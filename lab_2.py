@@ -1,59 +1,49 @@
-import numpy as np
 from matplotlib import pyplot as plt
+import numpy as np
+from scipy.interpolate import lagrange, splrep, splev
 
 
-class LinearApproximator:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
+class LinearInterpolation:
+    def __init__(self, train_X, train_y):
+        self.train_X = train_X
+        self.train_y = train_y
+        self.domain = train_X[0], train_X[-1]
 
-    def __call__(self, x):
-        for ind, item in enumerate(x):
-            if x < item:
+    def __call__(self, val):
+        bot, top = self._find_closest_indices_pair(val)
+        return self.train_y[bot] + (val - self.train_X[bot]) /\
+            (self.train_X[top] - self.train_X[bot]) \
+            * (self.train_y[top] - self.train_y[bot])
+
+    def _find_closest_indices_pair(self, val):
+        if val < self.domain[0] or val > self.domain[1]:
+            raise RuntimeError
+        for i, x in enumerate(self.train_X):
+            if val < x:
                 break
-
-
-def get_derivative_both(x: np.ndarray, y: np.ndarray):
-    """
-    Assuming x is equidistant.
-    :param step_span: indicates how many consecutive values should be
-        used to calaulate a local slope
-    """
-    y_start = y[:-2]
-    y_stop = y[2:]
-    y_diff = (y_stop - y_start) / (x[2] - x[0])
-    x_clip = x[1:-1]
-    return x_clip, y_diff
-
-
-def get_derivative_right(x: np.ndarray, y: np.ndarray, ):
-    """
-    Assuming x is equidistant.
-    :param step_span: indicates how many consecutive values should be
-        used to calaulate a local slope
-    """
-    y_start = y[:-1]
-    y_stop = y[1:]
-    y_diff = (y_stop - y_start) / (x[1] - x[0])
-    x_clip = x[:-1]
-    return x_clip, y_diff
+        return i - 1, i
 
 
 if __name__ == '__main__':
-    delta_x = .01
-    x = np.arange(0., 5., delta_x)
-    A = 10.
-    beta = .5
-    omega = 3.
-    y = A * np.exp(-beta * x) * np.cos(omega * x)
-
-    x_clip_both, y_der_both = get_derivative_both(x, y)
-    x_clip_right, y_der_right = get_derivative_right(x, y)
-
-    plt.scatter(x[1:-1], y[1:-1], marker='.', label='y')
-    plt.scatter(x[1:-1], y_der_both, marker='.', label='y\'_both')
-    plt.scatter(x[1:-1], y_der_right[1:], marker='.', label='y\'_right')
-    plt.legend()
+    x = [1, 2, 3, 4, 5, 10]
+    y = [0, 1, 2, 0, 2, 5]
+    li = LinearInterpolation(x, y)
+    print(li(7.5))
+    plt.scatter(x, y)
     plt.show()
 
+    x_inter = np.linspace(1, 10, 100)
+    y_inter = [li(x_curr) for x_curr in x_inter]
+    plt.scatter(x_inter, y_inter)
+    plt.show()
+
+    tck = splrep(x, y)
+    y_spl = splev(x_inter, tck)
+    plt.scatter(x_inter, y_spl)
+    plt.show()
+
+    poly = lagrange(x, y)
+    y_poly = np.polynomial.Polynomial(poly.coef[::-1])(x_inter)
+    plt.scatter(x_inter, y_poly)
+    plt.show()
     dbg_stp = 5
