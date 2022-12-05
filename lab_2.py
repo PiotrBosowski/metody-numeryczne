@@ -13,8 +13,6 @@ class LinearApproximator:
                 break
 
 
-
-
 def get_derivative_both(x: np.ndarray, y: np.ndarray):
     """
     Assuming x is equidistant.
@@ -48,7 +46,6 @@ if __name__ == '__main__':
     beta = .5
     omega = 3.
     y = A * np.exp(-beta * x) * np.cos(omega * x)
-
 
     x_clip_both, y_der_both = get_derivative_both(x, y)
     x_clip_right, y_der_right = get_derivative_right(x, y)
