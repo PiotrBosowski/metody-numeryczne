@@ -3,14 +3,24 @@ from matplotlib import pyplot as plt
 from scipy.optimize import minimize
 
 
-def potential_function(r):
+def nacl_potential(r):
     r_0 = 0.33
     V_0 = 1.09E3
     value = V_0 * np.exp(-r / r_0) + \
-        np.divide(-(np.e ** 2), (4 * np.pi * r),
-                  out=np.zeros_like(r),
-                  where=r != 0)
+            np.divide(-(np.e ** 2), (4 * np.pi * r),
+                      out=np.zeros_like(r),
+                      where=r != 0)
     return np.triu(value, k=1)
+
+
+def lennard_jones_potential(r):
+    r_triu = np.triu(r, k=1)
+    sigma = 1.0
+    eps = 5.0
+    sigma_r_ratio = np.divide(sigma, r_triu,
+                              out=np.zeros_like(r_triu),
+                              where=r_triu != 0)
+    return 4. * eps * (sigma_r_ratio ** 12 - sigma_r_ratio ** 6)
 
 
 def fill_cube(num_of_atoms, cube_size=1.):
@@ -27,7 +37,7 @@ def fill_cube(num_of_atoms, cube_size=1.):
                              size=(num_of_atoms, 3))
 
 
-def get_total_potential(coords_matrix, potential_fn=potential_function):
+def get_total_potential(coords_matrix, potential_fn=lennard_jones_potential):
     """
     Calculate a sum of all potentials between particles in the system,
     described by the coords_matrix, according to the potential_function,
@@ -59,8 +69,8 @@ def plot_coordinates(coords_matrix):
 if __name__ == '__main__':
     coords = fill_cube(8)
     plot_coordinates(coords)
-    print(get_total_potential(coords))
-    result = minimize(get_total_potential, coords, method='CG')
+    # print(get_total_potential(coords, lennard_jones_potential))
+    result = minimize(get_total_potential, coords)
     coords_best = result.x.reshape((-1, 3))
     plot_coordinates(coords_best)
     dbg_stp = 5
