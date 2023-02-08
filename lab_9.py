@@ -48,7 +48,7 @@ def dummy_fn(x: np.ndarray, params: np.ndarray):
         * np.exp((-(x - params[1]) ** 2) / (2 * params[2] ** 2))
 
 
-def criterion(params, criterion=dummy_fn, x=x_train, y=y_train):
+def residuals(params, criterion=dummy_fn, x=x_train, y=y_train):
     outputs = criterion(x, params)
     return y - outputs
 
@@ -56,7 +56,7 @@ def criterion(params, criterion=dummy_fn, x=x_train, y=y_train):
 if __name__ == '__main__':
     x_train, y_train = np.array(x_train), np.array(y_train)
     x_0 = np.array([1.0, 2.0, 3.0])
-    result = least_squares(criterion, x_0, method='lm')
+    result = least_squares(residuals, x_0, method='lm')
     print('Success:', result.success)
     print('Best x:', result.x)
     print('Num. of evaluations:', result.nfev)
