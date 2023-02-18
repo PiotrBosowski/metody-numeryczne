@@ -46,11 +46,12 @@ def crossover(ind_1, ind_2, mutation_chance=0.2):
     return output
 
 
-def tsp_demonstration(n_cities=30,
+def tsp_demonstration(n_cities=15,
                       ndim=2,
-                      epochs=400,
-                      n_individuals=2500,
-                      n_children=1500):
+                      epochs=100,
+                      n_individuals=400,
+                      n_children=200,
+                      mutation_chance=0.2):
     n_parents = n_individuals - n_children
     cities_positions = np.random.uniform(size=(n_cities, ndim))
     population = np.vstack([np.random.choice(n_cities,
@@ -82,7 +83,8 @@ def tsp_demonstration(n_cities=30,
                 p=weights[:n_parents] / np.sum(weights[:n_parents]))
             population[n_individuals - i - 1, :] = \
                 crossover(population[parents[0]],
-                          population[parents[1]])
+                          population[parents[1]],
+                          mutation_chance=mutation_chance)
         # plot the best path so far:
         path = np.concatenate(
             ([[0.0, 0.0]], cities_positions[population[0]], [[0.0, 0.0]]),
